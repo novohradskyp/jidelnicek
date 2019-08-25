@@ -9,6 +9,7 @@ namespace Jidelnicek.Backend.Provider
 {
     public class RestaurantsProvider
     {
+#pragma warning disable S1075 // URIs should not be hardcoded
         private readonly List<RestaurantDefinition> restaurants = new List<RestaurantDefinition>()
         {
             new RestaurantDefinition()
@@ -29,11 +30,15 @@ namespace Jidelnicek.Backend.Provider
             new RestaurantDefinition()
             {
                 Name = "Leonardo",
-#pragma warning disable S1075 // URIs should not be hardcoded
                 MenuProvider = new WebPageMenuProvider("http://www.penzion-luna.cz/?q=node/26559", "//div[@id='node-26559']/div[1]")
-#pragma warning restore S1075 // URIs should not be hardcoded
+            },
+            new RestaurantDefinition()
+            {
+                Name = "Padagali",
+                MenuProvider = new WebPageMenuProvider("http://padagali.cz/denni-menu/", "//div[@class='row']//li[@class='screen-reader-text']|//div[@class='row']//li//h4")
             }
         };
+#pragma warning restore S1075 // URIs should not be hardcoded
 
         public async Task<IEnumerable<IRestaurant>> GetAllRestaurantsAsync()
         {

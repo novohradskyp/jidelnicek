@@ -73,10 +73,16 @@ namespace Jidelnicek.Backend.Provider
             var responseStream = await webResponse.Content.ReadAsStreamAsync();
             var document = new HtmlDocument();
             document.Load(responseStream, true);
-            var menuNode = document.DocumentNode.SelectSingleNode(nodeXpath);
-            if (menuNode == null)
+            var menuNodes = document.DocumentNode.SelectNodes(nodeXpath);
+            if (menuNodes == null)
                 return null;
-            return WebUtility.HtmlDecode(menuNode.InnerText);
+            StringBuilder resultBuilder = new StringBuilder();
+            foreach (var node in menuNodes)
+            {
+                var nodeText = WebUtility.HtmlDecode(node.InnerText);
+                resultBuilder.AppendLine(nodeText);
+            }
+            return resultBuilder.ToString();
         }
 
         private bool IsDayMark(string line, DayOfWeek day)

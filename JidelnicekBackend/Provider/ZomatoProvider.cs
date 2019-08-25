@@ -28,21 +28,6 @@ namespace Jidelnicek.Backend.Provider
                 Name = "U Bílého beránka",
                 Id = 16506737
             },
-            new Restaurant()
-            {
-                Name = "Himalaya",
-                Id = 18020959
-            },
-            new Restaurant()
-            {
-                Name = "Golden Nepal",
-                Id = 18346442
-            },
-            new Restaurant()
-            {
-                Name = "Restaurace Leonardo",
-                Id = 16506573
-            }
         };
 
         public async Task<IEnumerable<IRestaurant>> ProvideRestaurantsAsync()

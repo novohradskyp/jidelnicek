@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Jidelnicek.Backend.Provider
 {
-    public class RestaurantsProvider
+    public class RestaurantsProvider : IRestaurantsProvider
     {
 #pragma warning disable S1075 // URIs should not be hardcoded
         private readonly List<RestaurantDefinition> restaurants = new List<RestaurantDefinition>()
@@ -47,7 +47,14 @@ namespace Jidelnicek.Backend.Provider
             {
                 var restaurant = new Restaurant();
                 restaurant.Name = definition.Name;
-                restaurant.Menu = await definition.MenuProvider.ProvideMenuAsync();
+                try
+                {
+                    restaurant.Menu = await definition.MenuProvider.ProvideMenuAsync();
+                }
+                catch(Exception)
+                {//Chyby při stahování jídelníčku ignorovat. V případě chyby dát prázdné menu.
+                    restaurant.Menu = new List<IMenuItem>();
+                }
                 restaurantList.Add(restaurant);
             }
             return restaurantList;

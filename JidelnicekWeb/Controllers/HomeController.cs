@@ -12,7 +12,7 @@ namespace Jidelnicek.Web.Controllers
     {
         public async Task<ActionResult> Index()
         {
-            RestaurantsProvider provider = new RestaurantsProvider();
+            IRestaurantsProvider provider = new CachingRestaurantsProvider(new RestaurantsProvider());
             var restaurants = await provider.GetAllRestaurantsAsync();
             return View(restaurants);
         }

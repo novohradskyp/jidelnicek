@@ -58,7 +58,9 @@
     <Compile Include="Model\Zomato\ZomatoDish.cs" />
     <Compile Include="Model\Zomato\ZomatoResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Provider\CachingRestaurantsProvider.cs" />
     <Compile Include="Provider\IMenuProvider.cs" />
+    <Compile Include="Provider\IRestaurantsProvider.cs" />
     <Compile Include="Provider\RestaurantsProvider.cs" />
     <Compile Include="Provider\WebPageMenuProvider.cs" />
     <Compile Include="Provider\ZomatoProvider.cs" />

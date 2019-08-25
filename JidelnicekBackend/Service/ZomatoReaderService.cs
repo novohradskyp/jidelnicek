@@ -14,7 +14,7 @@ using System.Configuration;
 
 namespace Jidelnicek.Backend.Service
 {
-    public class ZomatoReaderService
+    internal class ZomatoReaderService
     {
         private const string ZomatoApiUrl = "https://developers.zomato.com/api/v2.1/";
 

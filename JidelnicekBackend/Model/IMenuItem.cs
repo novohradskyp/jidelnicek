@@ -8,11 +8,6 @@ namespace Jidelnicek.Backend.Model
     public interface IMenuItem
     {
         /// <summary>
-        /// Den, pro který je položka menu platná.
-        /// </summary>
-        DateTime Day { get; }
-
-        /// <summary>
         /// Název jídla na menu.
         /// </summary>
         string Name { get; }

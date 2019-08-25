@@ -9,7 +9,7 @@ using Jidelnicek.Backend.Util;
 namespace Jidelnicek.Backend.Model.Zomato
 {
     [JsonObject]
-    public class ZomatoResponse
+    internal class ZomatoResponse
     {
         [JsonProperty("status")]
         public string Status { get; set; }

@@ -9,7 +9,7 @@ using Jidelnicek.Backend.Util;
 namespace Jidelnicek.Backend.Model.Zomato
 {
     [JsonObject]
-    public class ZomatoDailyMenu
+    internal class ZomatoDailyMenu
     {
         [JsonProperty("daily_menu_id")]
         public int Id { get; set; }

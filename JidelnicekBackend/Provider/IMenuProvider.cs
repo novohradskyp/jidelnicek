@@ -6,6 +6,6 @@ namespace Jidelnicek.Backend.Provider
 {
     public interface IMenuProvider
     {
-        Task<IEnumerable<IRestaurant>> ProvideRestaurantsAsync();
+        Task<IEnumerable<IMenuItem>> ProvideMenuAsync();
     }
 }

@@ -12,22 +12,25 @@ using Jidelnicek.Backend.Model;
 
 namespace Jidelnicek.Backend.Provider
 {
-    public class WebPageProvider : IMenuProvider
+    internal class WebPageMenuProvider : IMenuProvider
     {
-        public async Task<IEnumerable<IRestaurant>> ProvideRestaurantsAsync()
+        private readonly string url;
+        private readonly string nodeXpath;
+
+        public WebPageMenuProvider(string url, string nodeXpath)
+        {
+            this.url = url;
+            this.nodeXpath = nodeXpath;
+        }
+
+        public async Task<IEnumerable<IMenuItem>> ProvideMenuAsync()
         {
             var menus = new LinkedList<IMenuItem>();
-            Restaurant resultRestaurant = new Restaurant()
-            {
-                Id = 0,
-                Name = "Leonardo",
-                Menu = menus
-            };
             var menuText = await LoadTextFromHtmlNode();
             if (string.IsNullOrWhiteSpace(menuText))
-                return MakeEnumerableFromSingleElement(resultRestaurant);
+                return menus;
             ParseMenuFromText(menuText, menus);
-            return MakeEnumerableFromSingleElement(resultRestaurant);
+            return menus;
         }
 
         private void ParseMenuFromText(string menuText, LinkedList<IMenuItem> menus)
@@ -64,21 +67,16 @@ namespace Jidelnicek.Backend.Provider
         private async Task<string> LoadTextFromHtmlNode()
         {
             var Client = new HttpClient();
-            var webResponse = await Client.GetAsync("http://www.penzion-luna.cz/?q=node/26559");
+            var webResponse = await Client.GetAsync(url);
             if (!webResponse.IsSuccessStatusCode)
                 return null;
             var responseStream = await webResponse.Content.ReadAsStreamAsync();
             var document = new HtmlDocument();
             document.Load(responseStream, true);
-            var menuNode = document.DocumentNode.SelectSingleNode("//div[@id='node-26559']/div[1]");
+            var menuNode = document.DocumentNode.SelectSingleNode(nodeXpath);
             if (menuNode == null)
                 return null;
             return WebUtility.HtmlDecode(menuNode.InnerText);
-        }
-
-        private IEnumerable<T> MakeEnumerableFromSingleElement<T>(T element)
-        {
-            yield return element;
         }
 
         private bool IsDayMark(string line, DayOfWeek day)

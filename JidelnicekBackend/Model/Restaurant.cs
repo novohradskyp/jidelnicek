@@ -9,17 +9,12 @@ namespace Jidelnicek.Backend.Model
     /// <summary>
     /// Model restaurace.
     /// </summary>
-    public class Restaurant : IRestaurant
+    internal class Restaurant : IRestaurant
     {
         /// <summary>
         /// Název restaurace.
         /// </summary>
         public string Name { get; set; }
-
-        /// <summary>
-        /// Interní id restaurace.
-        /// </summary>
-        public int Id { get; set; }
 
         /// <summary>
         /// Položky nabízeného menu.

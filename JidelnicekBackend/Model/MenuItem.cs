@@ -9,7 +9,7 @@ namespace Jidelnicek.Backend.Model
     /// <summary>
     /// Model položky menu. Označuje jedno jídlo.
     /// </summary>
-    public class MenuItem : IMenuItem
+    internal class MenuItem : IMenuItem
     {
         /// <summary>
         /// Den, pro který je položka menu platná.

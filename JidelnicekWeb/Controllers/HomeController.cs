@@ -12,11 +12,9 @@ namespace Jidelnicek.Web.Controllers
     {
         public async Task<ActionResult> Index()
         {
-            var ZomatoProvider = new CachingProvider(new ZomatoProvider());
-            var WebProvider = new CachingProvider(new WebPageProvider());
-            var ZomatoRestaurants = await ZomatoProvider.ProvideRestaurantsAsync();
-            var WebPageRestaurants = await WebProvider.ProvideRestaurantsAsync();
-            return View(ZomatoRestaurants.Union(WebPageRestaurants));
+            RestaurantsProvider provider = new RestaurantsProvider();
+            var restaurants = await provider.GetAllRestaurantsAsync();
+            return View(restaurants);
         }
     }
 }

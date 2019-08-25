@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace Jidelnicek.Backend.Model.Zomato
 {
     [JsonObject]
-    public class ZomatoDish
+    internal class ZomatoDish
     {
         [JsonProperty("dish_id")]
         public int Id { get; set; }

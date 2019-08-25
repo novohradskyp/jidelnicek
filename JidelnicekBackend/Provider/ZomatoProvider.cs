@@ -9,54 +9,31 @@ using System.Threading.Tasks;
 
 namespace Jidelnicek.Backend.Provider
 {
-    public class ZomatoProvider : IMenuProvider
+    internal class ZomatoProvider : IMenuProvider
     {
-        private static readonly List<Restaurant> Restaurants = new List<Restaurant>()
-        {
-            new Restaurant()
-            {
-                Name = "U Dřeváka",
-                Id = 16505458
-            },
-            new Restaurant()
-            {
-                Name = "Divá Bára",
-                Id = 16514047
-            },
-            new Restaurant()
-            {
-                Name = "U Bílého beránka",
-                Id = 16506737
-            },
-        };
+        private readonly int restaurantId;
 
-        public async Task<IEnumerable<IRestaurant>> ProvideRestaurantsAsync()
+        public ZomatoProvider(int restaurantId)
         {
-            var Result = new List<Restaurant>();
+            this.restaurantId = restaurantId;
+        }
+
+        public async Task<IEnumerable<IMenuItem>> ProvideMenuAsync()
+        {
             var Reader = new ZomatoReaderService();
-            foreach (var Rest in Restaurants)
-            {
-                var Menu = await Reader.ReadMenuAsync(Rest.Id);
-                var Output = new Restaurant()
-                {
-                    Name = Rest.Name,
-                    Id = Rest.Id,
-                    Menu = Menu.SelectMany
+            var Menu = await Reader.ReadMenuAsync(restaurantId);
+            return Menu.SelectMany
+                (
+                    ZomatoMenu => ZomatoMenu.Dishes.Select
                     (
-                        ZomatoMenu => ZomatoMenu.Dishes.Select
-                        (
-                            Dish => new MenuItem()
-                            {
-                                Day = ZomatoMenu.StartDate,
-                                Name = Dish.Name,
-                                Price = Dish.Price
-                            }
-                        )
+                        Dish => new MenuItem()
+                        {
+                            Day = ZomatoMenu.StartDate,
+                            Name = Dish.Name,
+                            Price = Dish.Price
+                        }
                     )
-                };
-                Result.Add(Output);
-            }
-            return Result;
+                );
         }
     }
 }

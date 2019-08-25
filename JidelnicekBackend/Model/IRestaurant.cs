@@ -13,11 +13,6 @@ namespace Jidelnicek.Backend.Model
         string Name { get; }
 
         /// <summary>
-        /// Interní id restaurace.
-        /// </summary>
-        int Id { get; }
-
-        /// <summary>
         /// Položky nabízeného menu.
         /// </summary>
         IEnumerable<IMenuItem> Menu { get; }

@@ -49,6 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Misc\ZomatoReadException.cs" />
+    <Compile Include="Model\AzureOcr\OcrResult.cs" />
+    <Compile Include="Model\AzureOcr\RecognitionResult.cs" />
+    <Compile Include="Model\AzureOcr\TextLine.cs" />
+    <Compile Include="Model\AzureOcr\Word.cs" />
     <Compile Include="Model\IMenuItem.cs" />
     <Compile Include="Model\IRestaurant.cs" />
     <Compile Include="Model\MenuItem.cs" />
@@ -61,9 +65,13 @@
     <Compile Include="Provider\CachingRestaurantsProvider.cs" />
     <Compile Include="Provider\IMenuProvider.cs" />
     <Compile Include="Provider\IRestaurantsProvider.cs" />
+    <Compile Include="Provider\IUrlTranslator.cs" />
     <Compile Include="Provider\RestaurantsProvider.cs" />
+    <Compile Include="Provider\RuzekUrlTranslator.cs" />
     <Compile Include="Provider\WebPageMenuProvider.cs" />
     <Compile Include="Provider\ZomatoProvider.cs" />
+    <Compile Include="Service\AzureOcrService.cs" />
+    <Compile Include="Service\IOcrService.cs" />
     <Compile Include="Service\ZomatoReaderService.cs" />
     <Compile Include="Util\SkipLevelConverter.cs" />
   </ItemGroup>

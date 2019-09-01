@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Jidelnicek.Backend.Model;
+using Jidelnicek.Backend.Service;
 
 namespace Jidelnicek.Backend.Provider
 {
@@ -16,11 +17,15 @@ namespace Jidelnicek.Backend.Provider
     {
         private readonly string url;
         private readonly string nodeXpath;
+        private readonly IUrlTranslator imageUrlTranslator;
 
-        public WebPageMenuProvider(string url, string nodeXpath)
+        public IOcrService OcrService { get; set; } = new AzureOcrService();
+
+        public WebPageMenuProvider(string url, string nodeXpath, IUrlTranslator imageUrlTranslator = null)
         {
             this.url = url;
             this.nodeXpath = nodeXpath;
+            this.imageUrlTranslator = imageUrlTranslator;
         }
 
         public async Task<IEnumerable<IMenuItem>> ProvideMenuAsync()
@@ -37,7 +42,7 @@ namespace Jidelnicek.Backend.Provider
         {
             var today = DateTime.Now;
             var tomorow = today.AddDays(1);
-            var menuParser = new Regex(@"^\s*(\w.*?)\s*(\d+)?(?:,-)?(?:Kč|kč|Kc|kc)?\s*$", RegexOptions.Multiline);
+            var menuParser = new Regex(@"^\s*(\S.*?)\s*(\d+)?(?:,-)?(?:Kč|kč|Kc|kc|KC)?\s*$", RegexOptions.Multiline);
             var menuMatches = menuParser.Matches(menuText);
             bool insideCurrentDay = false;
             foreach (Match match in menuMatches)
@@ -79,21 +84,59 @@ namespace Jidelnicek.Backend.Provider
             StringBuilder resultBuilder = new StringBuilder();
             foreach (var node in menuNodes)
             {
-                var nodeText = WebUtility.HtmlDecode(node.InnerText);
+                var nodeText = await HtmlNodeToText(node);
                 resultBuilder.AppendLine(nodeText);
             }
             return resultBuilder.ToString();
         }
 
+        private async Task<string> HtmlNodeToText(HtmlNode node)
+        {
+            if("img".Equals(node.Name, StringComparison.InvariantCultureIgnoreCase))
+            {//Nalezený node je obrázek
+                return await GetTextFromImage(node.GetAttributeValue("src", string.Empty));
+            }
+            else //Node je normální HTML
+                return WebUtility.HtmlDecode(node.InnerText);
+        }
+
+        private async Task<string> GetTextFromImage(string imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+                return string.Empty;
+            if (imageUrlTranslator != null)
+                imageUrl = imageUrlTranslator.TranslateUrl(imageUrl);
+            return await OcrService.GetTextFromImageAsync(imageUrl);
+        }
+
         private bool IsDayMark(string line, DayOfWeek day)
         {
             var formatInfo = new CultureInfo("cs-cz").DateTimeFormat;
-            return StringContainsIgnoreCase(line, formatInfo.DayNames[(int)day]);
+            return StringContainsIgnoreCaseAndDiacritics(line, formatInfo.DayNames[(int)day]);
         }
 
-        private bool StringContainsIgnoreCase(string text, string contained)
+        private bool StringContainsIgnoreCaseAndDiacritics(string text, string contained)
         {
-            return text.ToUpper().Contains(contained.ToUpper());
+            string textWoDiacritics = RemoveDiacritics(text);
+            string containedWoDiacritics = RemoveDiacritics(contained);
+            return textWoDiacritics.IndexOf(containedWoDiacritics, StringComparison.InvariantCultureIgnoreCase) >= 0;
+        }
+
+        private string RemoveDiacritics(string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Jidelnicek.Backend.Misc
 {
+    [Serializable]
     public class ZomatoReadException : Exception
     {
         public ZomatoReadException()
@@ -18,6 +19,10 @@ namespace Jidelnicek.Backend.Misc
         }
 
         public ZomatoReadException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected ZomatoReadException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

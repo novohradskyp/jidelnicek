@@ -41,23 +41,25 @@ namespace Jidelnicek.Backend.Provider
 #pragma warning restore S1075 // URIs should not be hardcoded
 
         public async Task<IEnumerable<IRestaurant>> GetAllRestaurantsAsync()
+        {//Metoda umožní překrytí tasků pro získání menu.
+            return await Task.WhenAll(restaurants.Select(MakeRestaurantAsync));
+        }
+
+        private async Task<IRestaurant> MakeRestaurantAsync(RestaurantDefinition definition)
         {
-            List<Restaurant> restaurantList = new List<Restaurant>(restaurants.Count);
-            foreach(var definition in restaurants)
+            var restaurant = new Restaurant()
             {
-                var restaurant = new Restaurant();
-                restaurant.Name = definition.Name;
-                try
-                {
-                    restaurant.Menu = await definition.MenuProvider.ProvideMenuAsync();
-                }
-                catch(Exception)
-                {//Chyby při stahování jídelníčku ignorovat. V případě chyby dát prázdné menu.
-                    restaurant.Menu = new List<IMenuItem>();
-                }
-                restaurantList.Add(restaurant);
+                Name = definition.Name
+            };
+            try
+            {
+                restaurant.Menu = await definition.MenuProvider.ProvideMenuAsync();
             }
-            return restaurantList;
+            catch (Exception)
+            {//Chyby při stahování jídelníčku ignorovat. V případě chyby dát prázdné menu.
+                restaurant.Menu = new List<IMenuItem>();
+            }
+            return restaurant;
         }
     }
 }

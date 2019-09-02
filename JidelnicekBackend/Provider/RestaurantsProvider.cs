@@ -1,4 +1,5 @@
 ﻿using Jidelnicek.Backend.Model;
+using Jidelnicek.Backend.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,8 +61,9 @@ namespace Jidelnicek.Backend.Provider
             {
                 restaurant.Menu = await definition.MenuProvider.ProvideMenuAsync();
             }
-            catch (Exception)
+            catch (Exception e)
             {//Chyby při stahování jídelníčku ignorovat. V případě chyby dát prázdné menu.
+                TelemetrySetting.TelemetryClientInstance.TrackException(e, new Dictionary<string, string>() { { "Restaurant", definition.Name } });
                 restaurant.Menu = new List<IMenuItem>();
             }
             return restaurant;

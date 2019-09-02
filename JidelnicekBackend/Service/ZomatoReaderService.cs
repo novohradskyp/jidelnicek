@@ -11,6 +11,7 @@ using Jidelnicek.Backend.Model.Zomato;
 using Newtonsoft.Json.Serialization;
 using Jidelnicek.Backend.Misc;
 using System.Configuration;
+using Jidelnicek.Backend.Util;
 
 namespace Jidelnicek.Backend.Service
 {
@@ -32,10 +33,12 @@ namespace Jidelnicek.Backend.Service
             };
             var Client = GetClient();
             var Response = await Client.GetAsync(ApiUri.Uri);
+            TelemetrySetting.TelemetryClientInstance.TrackTrace($"Zomato - ReadMenu - response status code: {Response.StatusCode.ToString()}");
             if (Response.StatusCode == HttpStatusCode.OK)
             {
                 var ResultContent = await Response.Content.ReadAsStringAsync();
                 var Result = JsonConvert.DeserializeObject<ZomatoResponse>(ResultContent, Settings);
+                TelemetrySetting.TelemetryClientInstance.TrackTrace($"Zomato - ReadMenu - result status: {Result.Status}");
                 return Result.Menus;
             }
             else
@@ -49,9 +52,10 @@ namespace Jidelnicek.Backend.Service
                     if (Result != null && !string.IsNullOrWhiteSpace(Result.Status))
                         Error.Data.Add("Zomato status text", Result.Status);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     //Výjimka při zpracování chyby se ignoruje
+                    TelemetrySetting.TelemetryClientInstance.TrackException(e);
                 }
                 throw Error;
             }

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Jidelnicek.Backend.Model;
 using Jidelnicek.Backend.Service;
+using Jidelnicek.Backend.Util;
 
 namespace Jidelnicek.Backend.Provider
 {
@@ -50,7 +51,11 @@ namespace Jidelnicek.Backend.Provider
                 if (insideCurrentDay)
                 {
                     if (IsDayMark(match.Value, tomorow.DayOfWeek))
+                    {
+                        TelemetrySetting.TelemetryClientInstance.TrackTrace("Found next day");
                         break;
+                    }
+                    TelemetrySetting.TelemetryClientInstance.TrackTrace("Found menu inside current day");
                     var menuItem = new MenuItem();
                     menuItem.Day = today;
                     menuItem.Name = match.Groups[1].Value;
@@ -64,7 +69,10 @@ namespace Jidelnicek.Backend.Provider
                 else
                 {
                     if (IsDayMark(match.Value, today.DayOfWeek))
+                    {
                         insideCurrentDay = true;
+                        TelemetrySetting.TelemetryClientInstance.TrackTrace("Found current day");
+                    }
                 }
             }
         }
@@ -82,6 +90,7 @@ namespace Jidelnicek.Backend.Provider
             if (menuNodes == null)
                 return null;
             StringBuilder resultBuilder = new StringBuilder();
+            TelemetrySetting.TelemetryClientInstance.TrackTrace($"Found {menuNodes.Count} nodes.");
             foreach (var node in menuNodes)
             {
                 var nodeText = await HtmlNodeToText(node);

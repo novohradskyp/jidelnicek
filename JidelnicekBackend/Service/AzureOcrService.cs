@@ -1,4 +1,5 @@
 ﻿using Jidelnicek.Backend.Model.AzureOcr;
+using Jidelnicek.Backend.Util;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace Jidelnicek.Backend.Service
                 string imageUrlInJson = JsonConvert.SerializeObject(new { url = imageUrl });
                 var ocrPostContent = new StringContent(imageUrlInJson, Encoding.Default, "application/json");
                 var ocrResponse = await ocrClient.PostAsync(azureOcrUrl.Uri, ocrPostContent);
+                TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - asyncBatchAnalyze - status code: {ocrResponse.StatusCode.ToString()}");
                 if (ocrResponse.StatusCode != HttpStatusCode.Accepted)
                     return string.Empty;
                 resultLocation = ocrResponse.Headers.GetValues("Operation-Location").FirstOrDefault();
@@ -34,8 +36,10 @@ namespace Jidelnicek.Backend.Service
             do
             {
                 ocrResult = await ReadResult(resultLocation);
+                TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - response status: {ocrResult?.status}");
                 if (ocrResult != null && ocrResult.status.Equals("Running", StringComparison.InvariantCultureIgnoreCase))
                 {
+                    TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - waiting for {progressiveWaitTimeMs}ms");
                     await Task.Delay(progressiveWaitTimeMs);
                     progressiveWaitTimeMs = Math.Min(progressiveWaitTimeMs * 2, 60000);
                 }
@@ -45,6 +49,7 @@ namespace Jidelnicek.Backend.Service
                 return string.Empty;
 
             var builder = new StringBuilder();
+            TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - response have {ocrResult.recognitionResults.Count()} results and {ocrResult.recognitionResults.First().lines.Count()} lines in first one");
             foreach (var line in ocrResult.recognitionResults.First().lines)
             {
                 builder.AppendLine(line.text);
@@ -60,6 +65,7 @@ namespace Jidelnicek.Backend.Service
             {
                 ocrClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", ConfigurationManager.AppSettings["AzureVisionApiKey"]);
                 var ocrResponse = await ocrClient.GetAsync(resultLocation);
+                TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - HTTP status code: {ocrResponse.StatusCode.ToString()}");
                 if (!ocrResponse.IsSuccessStatusCode)
                     return null;
                 jsonResult = await ocrResponse.Content.ReadAsStringAsync();

@@ -16,6 +16,7 @@ namespace Jidelnicek.Web
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            Jidelnicek.Backend.Util.TelemetrySetting.TelemetryClientInstance = new Microsoft.ApplicationInsights.TelemetryClient();
         }
     }
 }

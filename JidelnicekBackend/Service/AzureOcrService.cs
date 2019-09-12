@@ -1,4 +1,5 @@
-﻿using Jidelnicek.Backend.Model.AzureOcr;
+﻿using Jidelnicek.Backend.Exceptions;
+using Jidelnicek.Backend.Model.AzureOcr;
 using Jidelnicek.Backend.Util;
 using Newtonsoft.Json;
 using System;
@@ -32,21 +33,23 @@ namespace Jidelnicek.Backend.Service
                 resultLocation = ocrResponse.Headers.GetValues("Operation-Location").FirstOrDefault();
             }
             OcrResult ocrResult;
-            int progressiveWaitTimeMs = 100;
+            int progressiveWaitTimeMs = 200;
             do
             {
+                TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - waiting for {progressiveWaitTimeMs}ms");
+                await Task.Delay(progressiveWaitTimeMs);
+                progressiveWaitTimeMs = Math.Min(progressiveWaitTimeMs * 2, 60000);
+
                 ocrResult = await ReadResult(resultLocation);
                 TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - response status: {ocrResult?.status}");
-                if (ocrResult != null && ocrResult.status.Equals("Running", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - waiting for {progressiveWaitTimeMs}ms");
-                    await Task.Delay(progressiveWaitTimeMs);
-                    progressiveWaitTimeMs = Math.Min(progressiveWaitTimeMs * 2, 60000);
-                }
             }
-            while (ocrResult != null && ocrResult.status.Equals("Running", StringComparison.InvariantCultureIgnoreCase));
+            while (ShouldReadAgain(ocrResult));
             if (ocrResult == null || !"Succeeded".Equals(ocrResult.status, StringComparison.InvariantCultureIgnoreCase))
-                return string.Empty;
+            {
+                var exception = new MenuReadException("OCR reading error");
+                exception.Data["OCR status"] = ocrResult?.status ?? "null";
+                throw exception;
+            }
 
             var builder = new StringBuilder();
             TelemetrySetting.TelemetryClientInstance.TrackTrace($"OCR - ReadResult - response have {ocrResult.recognitionResults.Count()} results and {ocrResult.recognitionResults.First().lines.Count()} lines in first one");
@@ -71,6 +74,17 @@ namespace Jidelnicek.Backend.Service
                 jsonResult = await ocrResponse.Content.ReadAsStringAsync();
             }
             return JsonConvert.DeserializeObject<OcrResult>(jsonResult);
+        }
+
+        private bool ShouldReadAgain(OcrResult ocrResult)
+        {
+            if (ocrResult == null)
+                return false;
+            if (ocrResult.status.Equals("Running", StringComparison.InvariantCultureIgnoreCase)
+                || ocrResult.status.Equals("NotStarted", StringComparison.InvariantCultureIgnoreCase))
+                return true;
+            else
+                return false;
         }
     }
 }

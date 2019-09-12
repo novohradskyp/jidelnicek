@@ -73,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\MenuReadException.cs" />
     <Compile Include="Misc\ZomatoReadException.cs" />
     <Compile Include="Model\AzureOcr\OcrResult.cs" />
     <Compile Include="Model\AzureOcr\RecognitionResult.cs" />

@@ -1,5 +1,7 @@
 ﻿using Jidelnicek.Backend.Model;
 using Jidelnicek.Backend.Util;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,20 +55,24 @@ namespace Jidelnicek.Backend.Provider
 
         private async Task<IRestaurant> MakeRestaurantAsync(RestaurantDefinition definition)
         {
-            var restaurant = new Restaurant()
+            using (var operation = TelemetrySetting.TelemetryClientInstance.StartOperation<DependencyTelemetry>("Load - " + definition.Name))
             {
-                Name = definition.Name
-            };
-            try
-            {
-                restaurant.Menu = await definition.MenuProvider.ProvideMenuAsync();
+                var restaurant = new Restaurant()
+                {
+                    Name = definition.Name
+                };
+                try
+                {
+                    restaurant.Menu = await definition.MenuProvider.ProvideMenuAsync();
+                }
+                catch (Exception e)
+                {//Chyby při stahování jídelníčku ignorovat. V případě chyby dát prázdné menu.
+                    TelemetrySetting.TelemetryClientInstance.TrackException(e, new Dictionary<string, string>() { { "Restaurant", definition.Name } });
+                    operation.Telemetry.Success = false;
+                    restaurant.Menu = new List<IMenuItem>();
+                }
+                return restaurant;
             }
-            catch (Exception e)
-            {//Chyby při stahování jídelníčku ignorovat. V případě chyby dát prázdné menu.
-                TelemetrySetting.TelemetryClientInstance.TrackException(e, new Dictionary<string, string>() { { "Restaurant", definition.Name } });
-                restaurant.Menu = new List<IMenuItem>();
-            }
-            return restaurant;
         }
     }
 }

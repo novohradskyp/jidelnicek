@@ -43,7 +43,7 @@ namespace Jidelnicek.Backend.Provider
         {
             var today = DateTime.Now;
             var tomorow = today.AddDays(1);
-            var menuParser = new Regex(@"^\s*(\S.*?)\s*(\d+)?(?:,-)?(?:Kč|kč|Kc|kc|KC)?\s*$", RegexOptions.Multiline);
+            var menuParser = new Regex(@"\s*(\S.*?)\s*(\d{2,})?(?:,-)?\s?(?:Kč|kč|Kc|kc|KC)?\s*$", RegexOptions.Multiline);
             var menuMatches = menuParser.Matches(menuText);
             bool insideCurrentDay = false;
             foreach (Match match in menuMatches)
@@ -101,12 +101,33 @@ namespace Jidelnicek.Backend.Provider
 
         private async Task<string> HtmlNodeToText(HtmlNode node)
         {
-            if("img".Equals(node.Name, StringComparison.InvariantCultureIgnoreCase))
+            if ("img".Equals(node.Name, StringComparison.InvariantCultureIgnoreCase))
             {//Nalezený node je obrázek
                 return await GetTextFromImage(node.GetAttributeValue("src", string.Empty));
             }
-            else //Node je normální HTML
+            else if (string.Equals(node.Name, "table", StringComparison.InvariantCultureIgnoreCase))
+            {//Nalezený node je tabulka
+                return GetTextFromHtmlTable(node);
+            }
+            else //Nalezený node je normální HTML
                 return WebUtility.HtmlDecode(node.InnerText);
+            
+        }
+
+        private string GetTextFromHtmlTable(HtmlNode node)
+        {
+            var result = new StringBuilder();
+            var rowNodes = node.SelectNodes(".//tr");
+            foreach (var rowNode in rowNodes)
+            {
+                foreach (var column in rowNode.SelectNodes(".//td"))
+                {
+                    result.Append(WebUtility.HtmlDecode(column.InnerText.Trim()));
+                    result.Append('\t');
+                }
+                result.AppendLine();
+            }
+            return result.ToString();
         }
 
         private async Task<string> GetTextFromImage(string imageUrl)

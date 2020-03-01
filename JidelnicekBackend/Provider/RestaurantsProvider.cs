@@ -38,12 +38,17 @@ namespace Jidelnicek.Backend.Provider
             new RestaurantDefinition()
             {
                 Name = "Padagali",
-                MenuProvider = new WebPageMenuProvider("http://padagali.cz/denni-menu/", "//div[@class='row']//li[@class='screen-reader-text']|//div[@class='row']//li//h4")
+                MenuProvider = new ZomatoProvider(18774679)
             },
             new RestaurantDefinition()
             {
                 Name = "Na růžku",
                 MenuProvider = new WebPageMenuProvider("https://www.naruzkubrno.cz/tydenni-menu/", "//div[@class='section-inner']//img", new RuzekUrlTranslator())
+            },
+            new RestaurantDefinition()
+            {
+                Name = "Al Capone",
+                MenuProvider = new WebPageMenuProvider("https://www.pizzaalcapone.cz/cz/poledni-menu", "//div[@class='container']//table")
             }
         };
 #pragma warning restore S1075 // URIs should not be hardcoded

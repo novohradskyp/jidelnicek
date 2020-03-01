@@ -29,3 +29,8 @@ steps:
     configuration: '$(buildConfiguration)'
     clean: true
 
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(build.artifactStagingDirectory)\JidelnicekWeb.zip'
+    artifact: 'JidelnicekWeb'
+    publishLocation: 'pipeline'

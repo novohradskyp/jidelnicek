@@ -24,11 +24,17 @@ steps:
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+    msbuildArgs: '/p:DeployOnBuild=true /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=FileSystem /p:DeleteExistingFiles=True /p:publishUrl="$(System.DefaultWorkingDirectory)\WebAppContent'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     clean: true
-
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)\WebAppContent'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/JidelnicekWeb.zip'
+    replaceExistingArchive: true
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(build.artifactStagingDirectory)\JidelnicekWeb.zip'

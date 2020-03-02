@@ -38,7 +38,7 @@ namespace Jidelnicek.Backend.Provider
             new RestaurantDefinition()
             {
                 Name = "Padagali",
-                MenuProvider = new ZomatoProvider(18774679)
+                MenuProvider = new WebPageMenuProvider("http://padagali.cz/denni-menu/", "//div[@class='row']//li[@class='screen-reader-text']|//div[@class='row']//li//h4")
             },
             new RestaurantDefinition()
             {
